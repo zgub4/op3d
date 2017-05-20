@@ -71,8 +71,6 @@ namespace op3d
 
         static void onWindowResized(GLFWwindow* window, int width, int height);
         void recreateSwapChain();
-        void createSwapChain();
-        void createImageViews();
         void createRenderPass();
         void createDescriptorSetLayout();
         void createGraphicsPipeline();
@@ -134,28 +132,19 @@ namespace op3d
 
         void createShaderModule(const std::vector<char>& code, VDeleter<VkShaderModule>& shaderModule);
 
-        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
-        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> availablePresentModes);
-        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-
-
-
 
         GLFWwindow* window{ nullptr };
 
-        Instance instance{ vkDestroyInstance };
-        DebugCallback callback{ instance, DestroyDebugReportCallbackEXT };
-        Surface surface{ instance, vkDestroySurfaceKHR };
-        PhysicalDevice physicalDevice;
-        Device device{ vkDestroyDevice };
+        Instance        instance{ vkDestroyInstance };
+        DebugCallback   callback{ instance, DestroyDebugReportCallbackEXT };
+        Surface         surface{ instance, vkDestroySurfaceKHR };
+        PhysicalDevice  physicalDevice;
+        Device          device{ vkDestroyDevice };
 
         VkQueue graphicsQueue{ VK_NULL_HANDLE };
         VkQueue presentQueue{ VK_NULL_HANDLE };
 
-        VDeleter<VkSwapchainKHR> swapChain{ device, vkDestroySwapchainKHR };
-        std::vector<VkImage> swapChainImages;
-        VkFormat swapChainImageFormat;
-        VkExtent2D swapChainExtent;
+        SwapChain swapChain{ device,vkDestroySwapchainKHR };
         std::vector<VDeleter<VkImageView>> swapChainImageViews;
         std::vector<VDeleter<VkFramebuffer>> swapChainFramebuffers;
 

@@ -8,6 +8,8 @@
 #include "SwapChainSupportDetails.h"
 #include "QueueFamilyIndices.h"
 #include "DeviceExtensions.h"
+#include "VDeleter.h"
+#include "SwapChain.h"
 
 namespace op3d
 {

@@ -125,6 +125,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="PhysicalDevice.cpp" />
     <ClCompile Include="Surface.cpp" />
+    <ClCompile Include="SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DebugCallback.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="PhysicalDevice.h" />
     <ClInclude Include="QueueFamilyIndices.h" />
     <ClInclude Include="Surface.h" />
+    <ClInclude Include="SwapChain.h" />
     <ClInclude Include="SwapChainSupportDetails.h" />
     <ClInclude Include="ValidationLayers.h" />
     <ClInclude Include="VDeleter.h" />
