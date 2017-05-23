@@ -117,6 +117,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommandBuffer.cpp" />
     <ClCompile Include="DebugCallback.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Engine.cpp" />
@@ -128,6 +129,7 @@
     <ClCompile Include="SwapChain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CommandBuffer.h" />
     <ClInclude Include="DebugCallback.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceExtensions.h" />

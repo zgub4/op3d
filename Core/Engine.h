@@ -26,6 +26,7 @@
 #include "PhysicalDevice.h"
 #include "Device.h"
 #include "DebugCallback.h"
+#include "CommandBuffer.h"
 
 #include "IO.h"
 
@@ -75,7 +76,6 @@ namespace op3d
         void createDescriptorSetLayout();
         void createGraphicsPipeline();
         void createFramebuffers();
-        void createCommandPool();
         void createDepthResources();
         void createTextureImage();
         void createTextureImageView();
@@ -113,8 +113,6 @@ namespace op3d
                           VDeleter<VkBuffer>& buffer,
                           VDeleter<VkDeviceMemory>& bufferMemory);
 
-        VkCommandBuffer beginSingleTimeCommands();
-        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
@@ -153,7 +151,7 @@ namespace op3d
         VDeleter<VkPipelineLayout> pipelineLayout{ device, vkDestroyPipelineLayout };
         VDeleter<VkPipeline> graphicsPipeline{ device, vkDestroyPipeline };
 
-        VDeleter<VkCommandPool> commandPool{ device, vkDestroyCommandPool };
+        CommandBuffer commandBufferManager{ device };
 
         VDeleter<VkImage> textureImage{ device, vkDestroyImage };
         VDeleter<VkDeviceMemory> textureImageMemory{ device, vkFreeMemory };

@@ -33,7 +33,7 @@ void op3d::Engine::initVulkan()
     createRenderPass();
     createDescriptorSetLayout();
     createGraphicsPipeline();
-    createCommandPool();
+    commandBufferManager.createCommandPool(physicalDevice, surface);
     createDepthResources();
     createFramebuffers();
     createTextureImage();
@@ -53,15 +53,12 @@ void op3d::Engine::mainLoop()
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
-
         updateUniformBuffer();
         drawFrame();
     }
 
     vkDeviceWaitIdle(device);
-
     glfwDestroyWindow(window);
-
     glfwTerminate();
 }
 
@@ -334,20 +331,6 @@ void op3d::Engine::createFramebuffers()
     }
 }
 
-void op3d::Engine::createCommandPool()
-{
-    QueueFamilyIndices queueFamilyIndices = QueueFamilyIndices::findQueueFamilies(physicalDevice, surface);
-
-    VkCommandPoolCreateInfo poolInfo = {};
-    poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
-
-    if (vkCreateCommandPool(device, &poolInfo, nullptr, commandPool.replace()) != VK_SUCCESS)
-    {
-        throw std::runtime_error("failed to create graphics command pool!");
-    }
-}
-
 void op3d::Engine::createDepthResources()
 {
     VkFormat depthFormat = findDepthFormat();
@@ -527,7 +510,7 @@ void op3d::Engine::createImage(uint32_t width,
 
 void op3d::Engine::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = commandBufferManager.beginSingleTimeCommands();
 
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -589,12 +572,12 @@ void op3d::Engine::transitionImageLayout(VkImage image, VkFormat format, VkImage
         1, &barrier
     );
 
-    endSingleTimeCommands(commandBuffer);
+    commandBufferManager.endSingleTimeCommands(commandBuffer, graphicsQueue);
 }
 
 void op3d::Engine::copyImage(VkImage srcImage, VkImage dstImage, uint32_t width, uint32_t height)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = commandBufferManager.beginSingleTimeCommands();
 
     VkImageSubresourceLayers subResource = {};
     subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -618,7 +601,7 @@ void op3d::Engine::copyImage(VkImage srcImage, VkImage dstImage, uint32_t width,
         1, &region
     );
 
-    endSingleTimeCommands(commandBuffer);
+    commandBufferManager.endSingleTimeCommands(commandBuffer, graphicsQueue);
 }
 
 void op3d::Engine::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, VDeleter<VkImageView>& imageView)
@@ -803,50 +786,15 @@ void op3d::Engine::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkM
     vkBindBufferMemory(device, buffer, bufferMemory, 0);
 }
 
-VkCommandBuffer op3d::Engine::beginSingleTimeCommands()
-{
-    VkCommandBufferAllocateInfo allocInfo = {};
-    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = commandPool;
-    allocInfo.commandBufferCount = 1;
-
-    VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(device, &allocInfo, &commandBuffer);
-
-    VkCommandBufferBeginInfo beginInfo = {};
-    beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-    beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-    vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
-    return commandBuffer;
-}
-
-void op3d::Engine::endSingleTimeCommands(VkCommandBuffer commandBuffer)
-{
-    vkEndCommandBuffer(commandBuffer);
-
-    VkSubmitInfo submitInfo = {};
-    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &commandBuffer;
-
-    vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(graphicsQueue);
-
-    vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
-}
-
 void op3d::Engine::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
-    VkCommandBuffer commandBuffer = beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = commandBufferManager.beginSingleTimeCommands();
 
     VkBufferCopy copyRegion = {};
     copyRegion.size = size;
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    endSingleTimeCommands(commandBuffer);
+    commandBufferManager.endSingleTimeCommands(commandBuffer, graphicsQueue);
 }
 
 uint32_t op3d::Engine::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
@@ -899,14 +847,14 @@ void op3d::Engine::createCommandBuffers()
 {
     if (commandBuffers.size() > 0)
     {
-        vkFreeCommandBuffers(device, commandPool, commandBuffers.size(), commandBuffers.data());
+        vkFreeCommandBuffers(device, commandBufferManager.getCommandPool(), commandBuffers.size(), commandBuffers.data());
     }
 
     commandBuffers.resize(swapChainFramebuffers.size());
 
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = commandPool;
+    allocInfo.commandPool = commandBufferManager.getCommandPool();
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
