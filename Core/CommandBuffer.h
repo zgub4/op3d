@@ -18,9 +18,8 @@ namespace op3d
         VkCommandPool getCommandPool() const { return commandPool; }
 
     private:
-        VDeleter<VkCommandPool> commandPool;
-
         const Device& device;
+        VDeleter<VkCommandPool> commandPool;
     };
 }
 

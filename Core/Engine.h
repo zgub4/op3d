@@ -8,8 +8,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
-#include <stdexcept>
-#include <functional>
 #include <chrono>
 #include <fstream>
 #include <algorithm>
@@ -17,28 +15,24 @@
 #include <cstring>
 #include <array>
 #include <set>
-#include "Vertex.h"
-#include "VDeleter.h"
 #include <string.h>
 
+#include "Vertex.h"
+#include "VDeleter.h"
 #include "Instance.h"
 #include "Surface.h"
 #include "PhysicalDevice.h"
 #include "Device.h"
 #include "DebugCallback.h"
 #include "CommandBuffer.h"
+#include "DescriptorSet.h"
+#include "DescriptorPool.h"
 
 #include "IO.h"
+#include "UniformBufferObject.h"
 
 const int WIDTH = 800;
 const int HEIGHT = 600;
-
-struct UniformBufferObject
-{
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 proj;
-};
 
 const std::vector<op3d::Vertex> vertices = {
     {{-0.5f, -0.5f, 0.0f},{1.0f, 0.0f, 0.0f}, {0.0f, 0.0f}},
@@ -104,8 +98,6 @@ namespace op3d
         void createVertexBuffer();
         void createIndexBuffer();
         void createUniformBuffer();
-        void createDescriptorPool();
-        void createDescriptorSet();
 
         void createBuffer(VkDeviceSize size,
                           VkBufferUsageFlags usage,
@@ -129,7 +121,6 @@ namespace op3d
         void drawFrame();
 
         void createShaderModule(const std::vector<char>& code, VDeleter<VkShaderModule>& shaderModule);
-
 
         GLFWwindow* window{ nullptr };
 
@@ -172,8 +163,8 @@ namespace op3d
         VDeleter<VkBuffer> uniformBuffer{ device, vkDestroyBuffer };
         VDeleter<VkDeviceMemory> uniformBufferMemory{ device, vkFreeMemory };
 
-        VDeleter<VkDescriptorPool> descriptorPool{ device, vkDestroyDescriptorPool };
-        VkDescriptorSet descriptorSet;
+        DescriptorSet descriptorSet;
+        DescriptorPool descriptorPool{ device };
 
         std::vector<VkCommandBuffer> commandBuffers;
 

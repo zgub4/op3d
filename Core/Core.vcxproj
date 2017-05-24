@@ -119,6 +119,8 @@
   <ItemGroup>
     <ClCompile Include="CommandBuffer.cpp" />
     <ClCompile Include="DebugCallback.cpp" />
+    <ClCompile Include="DescriptorPool.cpp" />
+    <ClCompile Include="DescriptorSet.cpp" />
     <ClCompile Include="Device.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Instance.cpp" />
@@ -131,6 +133,8 @@
   <ItemGroup>
     <ClInclude Include="CommandBuffer.h" />
     <ClInclude Include="DebugCallback.h" />
+    <ClInclude Include="DescriptorPool.h" />
+    <ClInclude Include="DescriptorSet.h" />
     <ClInclude Include="Device.h" />
     <ClInclude Include="DeviceExtensions.h" />
     <ClInclude Include="Engine.h" />
@@ -141,9 +145,11 @@
     <ClInclude Include="Surface.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="SwapChainSupportDetails.h" />
+    <ClInclude Include="UniformBufferObject.h" />
     <ClInclude Include="ValidationLayers.h" />
     <ClInclude Include="VDeleter.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="VObject.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
